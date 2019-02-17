@@ -101,7 +101,7 @@ class MessageFormatter(BaseTensor):
 
 
 global_msg_count = 0
-mid3 = open_midi_file("/Users/mrityunjaykumar/PycharmProjects/CewitHack/data/actual_midi/twokb.mid")
+mid3 = open_midi_file("../data/actual_midi/twokb.mid")
 
 
 def check_msg_type(msg):
