@@ -1,4 +1,4 @@
-# CewitHack
+## Generation of piano notes using Embedding of generative neural networks
 
 Dataset:
 [Lakh Pianoroll Dataset](https://salu133445.github.io/lakh-pianoroll-dataset/)
