@@ -1,0 +1,41 @@
+.projectName {
+	text-align: center;
+	font-size: 60px;
+	font-family: "Impact", Charcoal, sans-serif;
+	outline-style: solid;
+}
+
+body {
+	background-image: url("page-background.jpg");
+}
+
+.homepageDescription {
+	text-align: center;
+	font-size: 30px;
+	font-family: "Times New Roman", Times, serif;
+}
+
+.newTrackDescription{
+	text-align: center;
+	font-size: 30px;
+	font-family: "Times New Roman", Times, serif;
+}
+
+.dropDownInstruments {
+	height: 50px;
+	
+}
+
+.dropDownList{
+	margin-left: 656px;
+	font-size: 20px;
+	font-family: "Times New Roman", Times, serif;
+}
+
+.writeButton {
+	background: #FFFFFF;
+	margin-left: 890px;
+	font-size: 20px;
+	font-family: "Times New Roman", Times, serif;
+}
+
