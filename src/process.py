@@ -2,6 +2,8 @@ import mido
 from mido.messages import messages
 import json
 
+from tqdm import tqdm
+
 
 def check_if_file_exists(function_name):
     def check_it(*args, **kwargs):
@@ -101,49 +103,65 @@ class MessageFormatter(BaseTensor):
 
 
 global_msg_count = 0
-mid3 = open_midi_file("../data/actual_midi/demo.mid")
+import os
 
 
-def check_msg_type(msg):
-    if "reset time" in msg:
-        return ResetTimerMsg
-    elif "velocity" in msg and "channel" in msg:
-        return MessageFormatter
-    else:
-        return UnknownMsgType
+def get_all_file_from_directory(path):
+    all_files_with_full_path = []
+    for path, subdirs, files in os.walk(path):
+        for name in files:
+            xx = os.path.join(path, name)
+            all_files_with_full_path.append(xx)
+    return all_files_with_full_path
 
 
-all_data_points = {}
-for i, track in enumerate(mid3.tracks):
-    print("--*--" * 20)
-    print('Track {}: {}'.format(i, track.name))
-    # print(track,dir(track))
-    len_msg = len(track)
+all_files = get_all_file_from_directory("../data/lakhdataset_midi")
+v_counter = 1
+for each_file in tqdm(all_files):
+    mid3 = open_midi_file(each_file)
 
-    for msg in track:
-        global_msg_count += 1
-        bytes_p = msg.bytes()
 
-        decoded_msg = str(mido.parse_all(bytes_p))
-        print(decoded_msg)
-
-        msg_type = check_msg_type(msg=decoded_msg)
-        if msg_type == MessageFormatter:
-            identifier = "M"
-            msg_repr = MessageFormatter(decoded_msg)
-        elif msg_type == ResetTimerMsg:
-            identifier = "R"
-            msg_repr = ResetTimerMsg(decoded_msg)
+    def check_msg_type(msg):
+        if "reset time" in msg:
+            return ResetTimerMsg
+        elif "velocity" in msg and "channel" in msg:
+            return MessageFormatter
         else:
-            identifier = "U"
-            msg_repr = UnknownMsgType()
+            return UnknownMsgType
 
-        all_data_points["%s_%s"%(identifier,global_msg_count)] = msg_repr.arr
 
-        # print("messages length={} track_id={}".format(len_msg, i + 1))
-    print("global messages count={}".format(global_msg_count))
+    all_data_points = {}
+    for i, track in enumerate(mid3.tracks):
+        # print("--*--" * 20)
+        # print('Track {}: {}'.format(i, track.name))
+        # print(track,dir(track))
+        len_msg = len(track)
 
-# save as json
-fp = open("data_v2.json","w")
-json.dump(all_data_points,fp)
-fp.close()
+        for msg in track:
+            global_msg_count += 1
+            bytes_p = msg.bytes()
+
+            decoded_msg = str(mido.parse_all(bytes_p))
+            # print(decoded_msg)
+
+            msg_type = check_msg_type(msg=decoded_msg)
+            if msg_type == MessageFormatter:
+                identifier = "M"
+                msg_repr = MessageFormatter(decoded_msg)
+            elif msg_type == ResetTimerMsg:
+                identifier = "R"
+                msg_repr = ResetTimerMsg(decoded_msg)
+            else:
+                identifier = "U"
+                msg_repr = UnknownMsgType()
+
+            all_data_points["%s_%s" % (identifier, global_msg_count)] = msg_repr.arr
+
+            # print("messages length={} track_id={}".format(len_msg, i + 1))
+        # print("global messages count={}".format(global_msg_count))
+
+    # save as json
+    fp = open("data_v%s.json" % v_counter, "w")
+    v_counter += 1
+    json.dump(all_data_points, fp)
+    fp.close()

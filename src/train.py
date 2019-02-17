@@ -3,7 +3,7 @@ import keras
 from keras import Sequential, Input, Model
 from keras.layers import LSTM, Dropout, Dense, Activation
 import numpy as np
-
+import os
 data_file_path = "data_v1.json"
 
 
@@ -29,9 +29,16 @@ def get_dataset(src_path):
     return datas
 
 
-dataset = get_dataset(src_path=data_file_path)
+# dataset = get_dataset(src_path=data_file_path)
 
-X = np.array([each["x"] for each in dataset])
+DATASETS = [file_ for file_ in os.listdir("all_new_mids")]
+ret_datsets = [get_dataset("all_new_mids/"+d) for d in DATASETS]
+wrapped = [[i["x"] for i in e] for e in ret_datsets]
+rest = []
+for e in wrapped:
+    rest.extend(e)
+
+X = np.array(rest)
 # base_shape = X.shape[1]
 X = X.reshape((-1, X.shape[1]))
 
@@ -43,12 +50,12 @@ def get_auto_encoder(input_shape):
     # this is our input placeholder
     input_img = Input(shape=(input_shape,))
     # "encoded" is the encoded representation of the input
-    en_inter = Dense(64, activation='relu')(input_img)
-    en_inter = Dense(32, activation='relu')(en_inter)
-    encoded = Dense(encoding_dim, activation='relu')(en_inter)
+    en_inter = Dense(32, activation='tanh')(input_img)
+    en_inter = Dense(16, activation='tanh')(en_inter)
+    encoded = Dense(encoding_dim, activation='tanh')(en_inter)
     # "decoded" is the lossy reconstruction of the input
-    intermediate = Dense(32, activation='relu')(encoded)
-    intermediate = Dense(64, activation='relu')(intermediate)
+    intermediate = Dense(16, activation='tanh')(encoded)
+    intermediate = Dense(32, activation='tanh')(intermediate)
     decoded = Dense(input_shape, activation='sigmoid')(intermediate)
 
     # this model maps an input to its reconstruction
@@ -75,12 +82,15 @@ from sklearn.model_selection import train_test_split
 # x_train, x_test, _, _ = train_test_split(X, np.zeros(shape=(X.shape[1],)), test_size=0.33, random_state=42)
 
 model_1.fit(X, X,
-            epochs=100,
-            batch_size=20,
+            epochs=200,
+            batch_size=50,
             shuffle=True,
             validation_split=0.4)
 
-encoded_imgs = encoder_1.predict(X)
+model_1.save("ae.m")
+encoder_1.save("encoder_1.m")
+
+# encoded_imgs = encoder_1.predict(X)
 
 
 
