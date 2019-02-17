@@ -144,6 +144,6 @@ for i, track in enumerate(mid3.tracks):
     print("global messages count={}".format(global_msg_count))
 
 # save as json
-# fp = open("data_v1.json","w")
-# json.dump(all_data_points,fp)
-# fp.close()
+fp = open("data_v1.json","w")
+json.dump(all_data_points,fp)
+fp.close()
