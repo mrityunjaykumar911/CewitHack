@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<canvas width="1000" height="600"></canvas>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+var drag = d3.drag();
+
+var canvas = d3.select("canvas"),
+    context = canvas.node().getContext("2d"),
+    width = canvas.property("width"),
+    height = canvas.property("height"),
+    radius = 32;
+
+var circles = d3.range(5).map(function(i) {
+  console.log(i);
+  
+  if (i==0){
+    return {index: 0, x:100, y:200};
+  }
+  else if(i==1){
+    return {index: 1, x:200, y:100};
+  }
+  else if(i==2){
+    return {index: 2, x:400, y:100};
+  }
+  else if(i==3){
+    return {index: 3, x:300, y:300};
+  }
+  else if(i==4) {
+    return {index: 4, x:800, y:200};
+  }
+});
+
+var color = d3.scaleOrdinal()
+    .range(d3.schemeCategory20);
+
+render();
+
+canvas.call(d3.drag()
+    .subject(dragsubject)
+    .on("start", dragstarted)
+    .on("drag", dragged)
+    .on("end", dragended)
+    .on("start.render drag.render end.render", render));
+
+function render() {
+  context.clearRect(0, 0, width, height);
+  for (var i = 0, n = circles.length, circle; i < n; ++i) {
+    circle = circles[i];
+    context.beginPath();
+    context.moveTo(circle.x + radius, circle.y);
+    context.arc(circle.x, circle.y, radius, 0, 2 * Math.PI);
+    context.fillStyle = color(circle.index);
+    context.fill();
+    if (circle.active) {
+      context.lineWidth = 2;
+      context.stroke();
+    }
+  }
+}
+
+function dragsubject() {
+  var i = 0,
+      n = circles.length,
+      dx,
+      dy,
+      d2,
+      s2 = radius * radius * 4, // Double the radius.
+      circle,
+      subject;
+
+  for (i = 0; i < n; ++i) {
+    circle = circles[i];
+    dx = d3.event.x - circle.x;
+    dy = d3.event.y - circle.y;
+    d2 = dx * dx + dy * dy;
+    if (d2 < s2) subject = circle, s2 = d2;
+  }
+  return subject;
+}
+
+function dragstarted() {
+  if(circles.indexOf(d3.event.subject)==0 || circle.indexOf(d3.event.subject)==4)
+  {
+    break;
+  }
+  else{
+    circles.splice(circles.indexOf(d3.event.subject), 1);
+    circles.push(d3.event.subject);
+    d3.event.subject.active = true;
+  }
+}
+
+function dragged() {
+  d3.event.subject.x = d3.event.x;
+  d3.event.subject.y = d3.event.y;
+}
+
+function dragended() {
+  d3.event.subject.active = false;
+}
+
+
+</script>
