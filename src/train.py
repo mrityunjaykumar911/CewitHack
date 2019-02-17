@@ -33,19 +33,23 @@ dataset = get_dataset(src_path=data_file_path)
 
 X = np.array([each["x"] for each in dataset])
 # base_shape = X.shape[1]
-X = X.reshape((X.shape[1], X.shape[0]))
+X = X.reshape((-1, X.shape[1]))
 
 
 def get_auto_encoder(input_shape):
     # this is the size of our encoded representations
-    encoding_dim = 32  # 32 floats -> compression of factor 24.5, assuming the input is 784 floats
+    encoding_dim = 4  # 32 floats -> compression of factor 24.5, assuming the input is 784 floats
 
     # this is our input placeholder
     input_img = Input(shape=(input_shape,))
     # "encoded" is the encoded representation of the input
-    encoded = Dense(encoding_dim, activation='relu')(input_img)
+    en_inter = Dense(64, activation='relu')(input_img)
+    en_inter = Dense(32, activation='relu')(en_inter)
+    encoded = Dense(encoding_dim, activation='relu')(en_inter)
     # "decoded" is the lossy reconstruction of the input
-    decoded = Dense(784, activation='sigmoid')(encoded)
+    intermediate = Dense(32, activation='relu')(encoded)
+    intermediate = Dense(64, activation='relu')(intermediate)
+    decoded = Dense(input_shape, activation='sigmoid')(intermediate)
 
     # this model maps an input to its reconstruction
     autoencoder = Model(input_img, decoded)
@@ -55,26 +59,28 @@ def get_auto_encoder(input_shape):
     # create a placeholder for an encoded (32-dimensional) input
     encoded_input = Input(shape=(encoding_dim,))
     # retrieve the last layer of the autoencoder model
-    decoder_layer = autoencoder.layers[-1]
+    # decoder_layer = autoencoder.layers[-1]
     # create the decoder model
-    decoder = Model(encoded_input, decoder_layer(encoded_input))
+    # decoder = Model(encoded_input, decoder_layer(encoded_input))
 
-    autoencoder.compile(optimizer='adadelta', loss='binary_crossentropy')
+    autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
 
-    return autoencoder, encoder, decoder
+    return autoencoder, encoder, None
 
 
-model_1, encoder_1, decoder_1 = get_auto_encoder(input_shape=X.shape[0])
+model_1, encoder_1, decoder_1 = get_auto_encoder(input_shape=X.shape[1])
 
 from sklearn.model_selection import train_test_split
 
-x_train, x_test, _, _ = train_test_split(X, np.zeros(shape=(1, X.shape[1])), test_size=0.33, random_state=42)
+# x_train, x_test, _, _ = train_test_split(X, np.zeros(shape=(X.shape[1],)), test_size=0.33, random_state=42)
 
-model_1.fit(x_train, x_train,
-            epochs=50,
-            batch_size=256,
+model_1.fit(X, X,
+            epochs=100,
+            batch_size=20,
             shuffle=True,
-            validation_data=(x_test, x_test))
+            validation_split=0.4)
 
-encoded_imgs = encoder_1.predict(x_test)
+encoded_imgs = encoder_1.predict(X)
+
+
 

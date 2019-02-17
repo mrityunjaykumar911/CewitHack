@@ -101,7 +101,7 @@ class MessageFormatter(BaseTensor):
 
 
 global_msg_count = 0
-mid3 = open_midi_file("../data/actual_midi/twokb.mid")
+mid3 = open_midi_file("../data/actual_midi/demo.mid")
 
 
 def check_msg_type(msg):
@@ -144,6 +144,6 @@ for i, track in enumerate(mid3.tracks):
     print("global messages count={}".format(global_msg_count))
 
 # save as json
-fp = open("data_v1.json","w")
+fp = open("data_v2.json","w")
 json.dump(all_data_points,fp)
 fp.close()
