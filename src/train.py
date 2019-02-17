@@ -1,6 +1,7 @@
 import json
 import keras
 from keras import Sequential, Input, Model
+from keras.callbacks import EarlyStopping
 from keras.layers import LSTM, Dropout, Dense, Activation
 import numpy as np
 import os
@@ -70,7 +71,7 @@ def get_auto_encoder(input_shape):
     # create the decoder model
     # decoder = Model(encoded_input, decoder_layer(encoded_input))
 
-    autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
+    autoencoder.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
     return autoencoder, encoder, None
 
@@ -81,11 +82,14 @@ from sklearn.model_selection import train_test_split
 
 # x_train, x_test, _, _ = train_test_split(X, np.zeros(shape=(X.shape[1],)), test_size=0.33, random_state=42)
 
+stop_early_if_overfit = EarlyStopping(monitor='val_loss', mode='min', verbose=0, patience=10)
+
 model_1.fit(X, X,
-            epochs=200,
+            epochs=100,
             batch_size=50,
             shuffle=True,
-            validation_split=0.4)
+            validation_split=0.3,
+            callbacks=[stop_early_if_overfit])
 
 model_1.save("ae.m")
 encoder_1.save("encoder_1.m")
